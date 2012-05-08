@@ -9,8 +9,8 @@ Dual licensed under the MIT and GPL licenses:
 
 ------------------------------------------------------------------------------
 
-Sets up a watermark for inputted fields... this will create a LABEL.watermark 
-tag immediately following the input tag, the positioning will be set absolute, 
+Sets up a watermark for inputted fields... this will create a LABEL.watermark
+tag immediately following the input tag, the positioning will be set absolute,
 and it will be positioned to match the input tag.
 
 To activate:
@@ -27,9 +27,6 @@ To style the tags as appropriate (you'll want to make sure the font matches):
 
 	label.placeholder {
 		cursor: text;				<--- display a cursor to match the text input
-
-		padding: 4px 4px 4px 4px;   <--- this should match the border+padding 
-											for the input field(s)
 		color: #999999;				<--- this will display as faded
 	}
 
@@ -48,19 +45,19 @@ Thanks to...
 	http://plugins.jquery.com/project/overlabel
 
 	This works similar to the overlabel, but creates the actual label tag
-	based on the placeholder attribute on the input tag, instead of 
+	based on the placeholder attribute on the input tag, instead of
 	relying on the markup to provide it.
 
 *****************************************************************************/
-(function($){
-	
+;(function($){
+
 	var ph = "PLACEHOLDER-INPUT";
 	var phl = "PLACEHOLDER-LABEL";
 	var boundEvents = false;
 	var default_options = {
 		labelClass: 'placeholder'
 	};
-	
+
 	//check for native support for placeholder attribute, if so stub methods and return
 	var input = document.createElement("input");
 	if ('placeholder' in input) {
@@ -96,6 +93,9 @@ Thanks to...
 					.addClass(opts.labelClass + '-for-' + this.tagName.toLowerCase()) //ex: watermark-for-textarea
 					.addClass(phl)
 					.text(input.attr('placeholder'));
+            $.each(["padding-left", "padding-right", "padding-top", "padding-bottom", "font-family", "font-size"], function(i,attrib) {
+                label.css(attrib, input.css(attrib));
+            });
 
 			input
 				.data(phl, '#' + label.attr('id'))	//set a reference to the label
@@ -115,7 +115,7 @@ Thanks to...
 				label=$(input.data(phl));
 
 			if (input.data(ph) !== ph) return;
-				
+
 			label.remove();
 			input.removeData(ph).removeData(phl).removeClass(ph).unbind('change',itemChange);
 		});
@@ -178,17 +178,25 @@ Thanks to...
 	};
 
 	function showPHL(input, forced) {
+	    //visibility hack for display:hidden elements
+	    if(!input.is(":visible")) {
+	        input.css("position", "absolute").css("visbility", "hidden").css("display", "block");
+	        var pos = input.position();
+	        input.css("display", "none").css("visbility", "visible").css("position", "static");
+	    } else {
+	        var pos = input.position();
+	    }
 		var label = $(input.data(phl));
 
 		//if not already shown, and needs to be, show it.
 		if ((forced || label.css('display') == 'none') && !input.val())
 			label
 				.text(input.attr('placeholder'))
-				.css('top', input.position().top + 'px')
-				.css('left', input.position().left + 'px')
+				.css('top', pos.top + 'px')
+				.css('left', pos.left + 'px')
 				.css('display', 'block');
 
-		//console.dir({ 'input': { 'id':input.attr('id'), 'pos': input.position() }});
+//		console.dir({ 'input': { 'id':input.attr('id'), 'pos': input.position() }});
 	}
 
 	var cr;
